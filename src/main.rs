@@ -22,9 +22,9 @@ fn main() -> Result<(), slint::PlatformError> {
             set_config(config);
             let app = ui_handle.unwrap();
             if get_config().enabled {
-                app.set_state("Stop".into())
+                app.set_state("🚫".into())
             } else {
-                app.set_state("Start".into())
+                app.set_state("🚀".into())
             }
         }
     });
@@ -49,7 +49,6 @@ fn main() -> Result<(), slint::PlatformError> {
                         str_seconds = "0".to_owned() + &*str_seconds
                     }
 
-                    println!("{:?}", time_seconds);
                     slint::invoke_from_event_loop(move || {
                         ui.unwrap()
                             .set_time((str_minutes.to_string() + ":" + &*str_seconds).into())
@@ -67,7 +66,6 @@ fn main() -> Result<(), slint::PlatformError> {
                     if str_seconds.len() < 2 {
                         str_seconds = "0".to_owned() + &*str_seconds
                     }
-                    println!("{:?}", time_seconds);
                     slint::invoke_from_event_loop(move || {
                         ui.unwrap()
                             .set_time((str_minutes.to_string() + ":" + &*str_seconds).into())
