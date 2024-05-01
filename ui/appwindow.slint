@@ -1,0 +1,24 @@
+import { Button, VerticalBox } from "std-widgets.slint";
+import "./assets/font.ttf";
+
+export component AppWindow inherits Window {
+    width: 300px;
+    height: 400px;
+    in-out property <string> time: "25:00";
+    in-out property <string> state: "Start";
+    callback start-timer();
+//    VerticalLayout {
+        Text {
+            text: time;
+            font-size: 70px;
+    //        y: 0px;
+            font-family: "Bebas Neue";
+        }
+        Button {
+            text: state;
+            y: 250px;
+            clicked => {start-timer()}
+        }
+    }
+//}
+
