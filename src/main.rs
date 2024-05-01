@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::thread;
 use std::time::Duration;
-use serde::{Deserialize, Serialize};
 slint::include_modules!();
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -29,11 +29,10 @@ fn main() -> Result<(), slint::PlatformError> {
         }
     });
 
-
     let ui_handle = ui.as_weak();
     std::thread::spawn(move || {
-        let mut session_time = 10 ;
-        let mut break_time = 5 ;
+        let mut session_time = 60 * 25;
+        let mut break_time = 60 * 5;
         loop {
             if get_config().enabled {
                 let ui = ui_handle.clone();
@@ -41,33 +40,55 @@ fn main() -> Result<(), slint::PlatformError> {
                 if session_time > 0 {
                     let time_minutes = session_time / 60;
                     let time_seconds = session_time - time_minutes * 60;
+                    let mut str_minutes = time_minutes.to_string();
+                    let mut str_seconds = time_seconds.to_string();
+                    if str_minutes.len() < 2 {
+                        str_minutes = "0".to_owned() + &*str_minutes
+                    }
+                    if str_seconds.len() < 2 {
+                        str_seconds = "0".to_owned() + &*str_seconds
+                    }
+
                     println!("{:?}", time_seconds);
-                    slint::invoke_from_event_loop(move || ui.unwrap().set_time((time_minutes.to_string() + ":" + &time_seconds.to_string()).into())).expect("TODO: panic message");
+                    slint::invoke_from_event_loop(move || {
+                        ui.unwrap()
+                            .set_time((str_minutes.to_string() + ":" + &*str_seconds).into())
+                    })
+                    .expect("TODO: panic message");
                     session_time -= 1;
                 } else if break_time > 1 {
                     let time_minutes = break_time / 60;
                     let time_seconds = break_time - time_minutes * 60;
+                    let mut str_minutes = time_minutes.to_string();
+                    let mut str_seconds = time_seconds.to_string();
+                    if str_minutes.len() < 2 {
+                        str_minutes = "0".to_owned() + &*str_minutes
+                    }
+                    if str_seconds.len() < 2 {
+                        str_seconds = "0".to_owned() + &*str_seconds
+                    }
                     println!("{:?}", time_seconds);
-                    let ui2 = ui.clone();
-                    slint::invoke_from_event_loop(move || ui.unwrap().set_time((time_minutes.to_string() + ":" + &time_seconds.to_string()).into())).expect("TODO: panic message");
+                    slint::invoke_from_event_loop(move || {
+                        ui.unwrap()
+                            .set_time((str_minutes.to_string() + ":" + &*str_seconds).into())
+                    })
+                    .expect("TODO: panic message");
                     break_time -= 1;
                     if break_time == 1 {
-                        slint::invoke_from_event_loop(move || ui2.unwrap().set_time((time_minutes.to_string() + ":" + &time_seconds.to_string()).into())).expect("TODO: panic message");
                         session_time = 60 * 25;
                         break_time = 60 * 5;
                     }
-                } 
+                }
                 thread::sleep(Duration::from_millis(1000));
             }
         }
-
     });
     ui.run()
 }
 
 pub fn get_config() -> Config {
     let path = data_dir().join("config.toml");
-    
+
     confy::load_path(path).unwrap_or_else(|_| {
         set_config(Config { enabled: false });
         Config { enabled: false }
