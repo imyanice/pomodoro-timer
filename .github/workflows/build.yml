@@ -33,7 +33,7 @@ jobs:
         run: cargo build --release --all-features
 
       - if: matrix.platform == 'macos-latest'
-        uses: imyanice/rust-build@latest
+        uses: imyanice/rust-build.action@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
