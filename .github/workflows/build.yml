@@ -1,0 +1,44 @@
+name: "release"
+
+# This will trigger the action on each push to the `release` branch.
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        
+      - if: matrix.platform == 'macos-latest'
+        run: rustup target add aarch64-apple-darwin
+      - if: matrix.platform == 'macos-latest'
+        run: rustup target add x86_64-apple-darwin
+      - if: matrix.platform == 'macos-latest'
+        run: cargo build --release --all-features --target=aarch64-apple-darwin
+      - if: matrix.platform == 'macos-latest'
+        run: cargo build --release --all-features --target=x86_64-apple-darwin
+        
+      - if: matrix.platform == 'windows-latest'
+        run: cargo build --release --all-features
+
+      - if: matrix.platform == 'macos-latest'
+        uses: imyanice/rust-build@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: app-v__VERSION__
+          releaseName: 'App v__VERSION__'
+          targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+          srcDir: './'
+      
